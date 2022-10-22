@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <csignal>
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
 int gBestValue = -1; // global best value
@@ -65,6 +66,9 @@ void signalHandler(int signum)
 
 int main( int argc, char* argv[] )
 {
+    char *cwd = get_current_dir_name();
+    cout << "Current working directory: " << cwd << endl;
+    free(cwd);
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
@@ -88,10 +92,11 @@ int main( int argc, char* argv[] )
 
     cout<<"Initialization ..."<<endl;
     gEnv->define();
+    //初始化问题
     for (int n = 0; n < 1000000; ++n)
     {
         printf("Run %d\n", n);
-        gEnv->doIt();
+        gEnv->doIt();//主函数
         if (gEnv->terminate) break;
     }
     gEnv->printOn();

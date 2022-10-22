@@ -1,5 +1,8 @@
 #ifndef __EVALUATOR__
+
+#include <iostream>
 #include "evaluator.h"
+#include "fstream"
 #endif
 
 TEvaluator::TEvaluator()
@@ -21,17 +24,21 @@ TEvaluator::~TEvaluator(){
     delete [] y;
 }
 
-void TEvaluator::setInstance( char filename[] )
+void TEvaluator::setInstance( char filename[] )//似乎是读取文件的函数
 {
     FILE* fp;
+
     int n;
     char word[ 80 ], type[ 80 ];
+    printf("Start reading the data from %s\n", filename);
     fp = fopen( filename, "r" );
 
     /* read instance */
-    while( 1 ){
+    for(int i=0;1<1000;i++){
         if( fscanf( fp, "%s", word ) == EOF ) break;
+        printf("Current Word is %s\n", word);
         if( strcmp( word, "DIMENSION" ) == 0 ){
+            printf("Position 0\n");
             fscanf( fp, "%s", word );
             fscanf( fp, "%d", &Ncity );
         }
@@ -45,8 +52,9 @@ void TEvaluator::setInstance( char filename[] )
         printf( "Error in reading the instance\n" );
         exit(0);
     }
+    printf("Start reading coordinate\n");
     x = new double [ Ncity ];
-    y = new double [ Ncity ];
+    y = new double [ Ncity ]; //节点的xy坐标
     int *checkedN = new int[Ncity];
 
     for( int i = 0; i < Ncity; ++i ){
@@ -57,6 +65,7 @@ void TEvaluator::setInstance( char filename[] )
         y[ i ] = atof( word );
     }
     fclose(fp);
+    printf("Total City number is %d\n" , Ncity);
     fEdgeDis = new int* [ Ncity ];
     for( int i = 0; i < Ncity; ++i ) fEdgeDis[ i ] = new int [ Ncity ];
     fNearCity = new int* [ Ncity ];
@@ -65,7 +74,7 @@ void TEvaluator::setInstance( char filename[] )
     if( strcmp( type, "EUC_2D" ) == 0  ) {
         for( int i = 0; i < Ncity ; ++i )
             for( int j = 0; j < Ncity ; ++j )
-                fEdgeDis[ i ][ j ]=(int)(sqrt((x[i]-x[j])*(x[i]-x[j])+(y[i]-y[j])*(y[i]-y[j]))+0.5);
+                fEdgeDis[ i ][ j ]=(int)(sqrt((x[i]-x[j])*(x[i]-x[j])+(y[i]-y[j])*(y[i]-y[j]))+0.5); //为什么要加上0.5
     }
     else if( strcmp( type, "ATT" ) == 0  ) {
         for( int i = 0; i < Ncity; ++i ){
@@ -105,6 +114,7 @@ void TEvaluator::setInstance( char filename[] )
             checkedN[ cityNum ] = 1;
         }
     }
+    //fNearCity这个矩阵存折每个city最近的 fNearNumMax 个City
 }
 
 void TEvaluator::doIt( TIndi& indi ){

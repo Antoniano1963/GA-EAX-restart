@@ -628,23 +628,23 @@ void TKopt::checkValid(){
 
 }
 
-void TKopt::makeRandSol( TIndi& indi ){
+void TKopt::makeRandSol( TIndi& indi ){ //生成初始解 要看懂解的形式是怎么样的？ indi是一个基因
     for( int j = 0; j < fN; ++j ) fB[j] = j;
     int r;
     for( int i = 0; i < fN; ++i ){
         r = rand() % (fN-i);
         fGene[i] = fB[r];
-        fB[r] = fB[fN-i-1];
+        fB[r] = fB[fN-i-1]; //因为最后的点随着i的增加是不能被随机数选中的，因此需要把后面的不能选择的点一次填补到前面的空位中，让这些点重新能被选择
     }
-
+    //因此fGene 储存的就是初始的解序列
     for( int j2 = 1 ; j2 < fN-1; ++j2 ){
         indi.fLink[fGene[j2]][0] = fGene[j2-1];
-        indi.fLink[fGene[j2]][1] = fGene[j2+1];
+        indi.fLink[fGene[j2]][1] = fGene[j2+1]; //这个结构应该是当前节点的前节点和后节点
     }
     indi.fLink[fGene[0]][0] = fGene[fN-1];
     indi.fLink[fGene[0]][1] = fGene[1];
     indi.fLink[fGene[fN-1]][0] = fGene[fN-2];
-    indi.fLink[fGene[fN-1]][1] = fGene[0];
+    indi.fLink[fGene[fN-1]][1] = fGene[0]; //连接首位
 
     eval->doIt( indi );
 }

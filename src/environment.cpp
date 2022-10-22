@@ -54,13 +54,13 @@ void TEnvironment::define()
 
 void TEnvironment::doIt()
 {
-    this->initPop();
-    this->init();
-    this->getEdgeFreq();
+    this->initPop(); //初始化种群，使用2-opt方法生成基础的解
+    this->init(); //初始化一些统计信息，如多少代之类的
+    this->getEdgeFreq(); //应该是用来计算熵的
     this->fTimeEnd = clock();
-    duration = (int)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+    duration = (int)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC); //计算时间？ fTimeStart是代码最开始生成子代的时间，因此计算的是当前代已经总共运行了多长时间了
 
-    while (duration < tmax)
+    while (duration < tmax) //判断会不会超时
     {
         this->setAverageBest();
         if (gBestValue == -1 || fBestValue < gBestValue)
@@ -101,10 +101,10 @@ void TEnvironment::doIt()
 
 void TEnvironment::init()
 {
-    fAccumurateNumCh = 0;
-    fCurNumOfGen = 0;
-    fStagBest = 0;
-    fMaxStagBest = 0;
+    fAccumurateNumCh = 0; //累计的子代数量嘛？
+    fCurNumOfGen = 0;  //应该是多少代把
+    fStagBest = 0;   //？
+    fMaxStagBest = 0;   //？
     fStage = 1;             /* Stage I */
     fFlagC[0] = 4;          /* Diversity preservation: 1:Greedy, 2:--- , 3:Distance, 4:Entropy (see Section 4) */
     fFlagC[1] = 1;          /* Eset Type: 1:Single-AB, 2:Block2 (see Section 3) */
@@ -200,7 +200,7 @@ void TEnvironment::generateKids( int s )
     fAccumurateNumCh += tCross->fNumOfGeneratedCh;
 }
 
-void TEnvironment::getEdgeFreq()
+void TEnvironment::getEdgeFreq() //应该是用来计算熵的
 {
     int  k0, k1, N = fEvaluator->Ncity;
     for( int j1 = 0; j1 < N; ++j1 )
