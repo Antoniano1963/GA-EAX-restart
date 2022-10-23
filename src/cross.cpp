@@ -134,9 +134,9 @@ TCross::~TCross()
     delete [] fABcycleInEset;
 }
 
-void TCross::setParents( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], int numOfKids )
+void TCross::setParents( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], int numOfKids ) //设置父代配对
 {
-    this->setABcycle( tPa1, tPa2, flagC, numOfKids );
+    this->setABcycle( tPa1, tPa2, flagC, numOfKids ); //生成AB Cycles的函数？
     fDisAB = 0;
     int curr, next, st, pre;
     st = 0;
@@ -148,7 +148,7 @@ void TCross::setParents( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
         if( tPa1.fLink[curr][0] != pre ) next = tPa1.fLink[ curr ][ 0 ];
         else next=tPa1.fLink[curr][1];
 
-        if( tPa2.fLink[ curr ][ 0 ] != next && tPa2.fLink[ curr ][ 1 ] != next ) ++fDisAB;
+        if( tPa2.fLink[ curr ][ 0 ] != next && tPa2.fLink[ curr ][ 1 ] != next ) ++fDisAB; //AB有一个不同的点
         fOrder[ i ] = curr;
         fInv[ curr ] = i;
     }
@@ -162,6 +162,7 @@ void TCross::setParents( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
 
 void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC[ 10 ], int **fEdgeFreq )
 {
+    //前文已经设置好AB Cycles了 存在fABCycles中
     int Num;
     int jnum, centerAB;
     int gain;
@@ -175,7 +176,7 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
     if ( numOfKids <= fNumOfABcycle ) Num = numOfKids;
     else Num = fNumOfABcycle;
 
-    if (fEsetType == 1) /* Single-AB */
+    if (fEsetType == 1) /* Single-AB */ //应该是核心选择操作？
     {
         tRand->permutation( fPermu, fNumOfABcycle, fNumOfABcycle );
     }
@@ -273,90 +274,99 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
 {
     bunkiMany=0; koritsuMany=0;
     for( int j = 0; j < fN ; ++j ){
-        nearData[j][1]=tPa1.fLink[j][0];
-        nearData[j][3]=tPa1.fLink[j][1];
-        nearData[j][0] = 2;
+        nearData[j][1]=tPa1.fLink[j][0]; //前序
+        nearData[j][3]=tPa1.fLink[j][1]; //后续
+        nearData[j][0] = 2; //感觉时记录节点还剩几个度？
 
-        koritsu[koritsuMany]=j;
+        koritsu[koritsuMany]=j; // 所以这个数组是0-fN
         koritsuMany++;
 
         nearData[j][2]=tPa2.fLink[j][0];
-        nearData[j][4]=tPa2.fLink[j][1];
+        nearData[j][4]=tPa2.fLink[j][1]; //这里1 3 记录的是a 2 4记录的是b
     }
     for(int j = 0; j < fN; ++j ){
         checkKoritsu[j]=-1;
-        koriInv[koritsu[j]]=j;
+        koriInv[koritsu[j]]=j; //koriInv = koritsu?
     }
+    //这几把都是啥
+
+    //生成ABCycles的函数，要看的核心
+    // KoritsuMang = fN
     fNumOfABcycle=0;
-    flagSt=1;
+    flagSt=1; //应该指的是从头搜素还是继续搜素吧
     while(koritsuMany!=0){
         if(flagSt==1){
-            fPosiCurr=0;
-            r=rand()%koritsuMany;
-            st=koritsu[r];
-            checkKoritsu[st]=fPosiCurr;
-            fRoute[fPosiCurr]=st;
+            fPosiCurr=0; //感觉是当前选了几个点？
+            r=rand()%koritsuMany; //0-koristuMany
+            st=koritsu[r]; //获取第几个？
+            checkKoritsu[st]=fPosiCurr; //
+            fRoute[fPosiCurr]=st; //按照顺序存储了选择的节点
             ci=st;
             prType=2;
         }
-        else if(flagSt==0) ci=fRoute[fPosiCurr];
+        else if(flagSt==0) ci=fRoute[fPosiCurr]; //直接从fRoute中取点
 
         flagCycle=0;
         while(flagCycle==0){
-            fPosiCurr++;
+            fPosiCurr++; //应该是当前记录的点
             pr=ci;
             switch(prType){
             case 1:
-                ci=nearData[pr][fPosiCurr%2+1];
+                ci=nearData[pr][fPosiCurr%2+1]; //偶数1 奇数2
+//                ci=nearData[pr][(fPosiCurr+1)%2+1]; //偶数1 奇数2
             break;
-            case 2:
+            case 2: //应该是继续选取吧
                 r=rand()%2;
-                ci=nearData[pr][fPosiCurr%2+1+2*r];
-                if(r==0) this->swap(nearData[pr][fPosiCurr%2+1],nearData[pr][fPosiCurr%2+3]);
-            break;
-            case 3:
-                ci=nearData[pr][fPosiCurr%2+3];
+                ci=nearData[pr][fPosiCurr%2+1+2*r]; //奇数偶数交替选择， r=0 就是在12里选，要不是在34里选
+                if(r==0) this->swap(nearData[pr][fPosiCurr%2+1],nearData[pr][fPosiCurr%2+3]); //这一步意义是啥？ 感觉应该是如果只剩一条边的话默认选1吧 选了1 2把3 4换到1 2 选了3 4不动？ 也就是说1 2一定是没有用过的
+//                ci=nearData[pr][(fPosiCurr+1)%2+1+2*r]; //奇数偶数交替选择， r=0 就是在12里选，要不是在34里选
+//                if(r==0) this->swap(nearData[pr][(fPosiCurr+1)%2+1],nearData[pr][(fPosiCurr+1)%2+3]); //这一步意义是啥？ 感觉应该是如果只剩一条边的话默认选1吧 选了1 2把3 4换到1 2 选了3 4不动？ 也就是说1 2一定是没有用过的
+//            break;
+//            case 3:
+//                ci=nearData[pr][fPosiCurr%2+3]; //偶数3 奇数4？
+////                ci=nearData[pr][(fPosiCurr+1)%2+3]; //偶数3 奇数4？
             }
-            fRoute[fPosiCurr]=ci;
-            if(nearData[ci][0]==2){
-                if(ci==st){
-                    if(checkKoritsu[st]==0){
-                    if((fPosiCurr-checkKoritsu[st])%2==0){
-                        if(nearData[st][fPosiCurr%2+1]==pr) this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]);
 
-                        stAppear = 1;
+            fRoute[fPosiCurr]=ci; //fRoute按照顺序存储了选择的节点
+            if(nearData[ci][0]==2){ //如果当前选取的点的度还是2
+                if(ci==st){ //回到起点？
+                    if(checkKoritsu[st]==0){ //查看是不是第一次回到起始点
+                        if((fPosiCurr-checkKoritsu[st])%2==0){ //如果是偶数次探索回到起始点，那就说明可能存在AB-cycles
+                            if(nearData[st][fPosiCurr%2+1]==pr) this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]);
+
+                            stAppear = 1;
+                            this->formABcycle();
+                            if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
+                            if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
+
+                            flagSt=0;
+                            flagCycle=1;
+                            prType=1;
+                        }
+                        else{
+                            this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]); //为什么要交换？
+                            prType=2;
+                        }
+                        checkKoritsu[st]=fPosiCurr; //记录在第几个点第一次回到起始点？ 也就是说明不是第一次回到起始点了
+                    }
+                    else{ //如果不是第一次回到起始点
+                        stAppear = 2; //如果是第二次回到起点说明应该可以生成AB-Cycles了
                         this->formABcycle();
                         if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
                         if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
 
-                        flagSt=0;
+                        flagSt=1;
                         flagCycle=1;
-                        prType=1;
-                    }
-                    else{
-                        this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]);
-                        prType=2;
-                    }
-                    checkKoritsu[st]=fPosiCurr;
-                    }
-                    else{
-                    stAppear = 2;
-                    this->formABcycle();
-                    if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
-                    if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
-
-                    flagSt=1;
-                    flagCycle=1;
                     }
                 }
-                else if(checkKoritsu[ci]==-1) {
-                    checkKoritsu[ci]=fPosiCurr;
+                else if(checkKoritsu[ci]==-1) { //以前没有来过这个点
+                    checkKoritsu[ci]=fPosiCurr; //记录这个点是第几个被纳入缓存区的？
                     if(nearData[ci][fPosiCurr%2+1]==pr) this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]);
                     prType=2;
                 }
-                else if(checkKoritsu[ci]>0){
+                else if(checkKoritsu[ci]>0){ //以前来到过这个点
                     this->swap(nearData[ci][fPosiCurr%2+1],nearData[ci][fPosiCurr%2+3]);
-                    if((fPosiCurr-checkKoritsu[ci])%2==0){
+                    if((fPosiCurr-checkKoritsu[ci])%2==0){ //如果是偶数次回来了，应该是能生成AB cycles的
                         stAppear = 1;
                         this->formABcycle();
                         if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
@@ -366,12 +376,12 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
                         flagCycle=1;
                         prType=1;
                     }
-                    else{
-                        this->swap(nearData[ci][(fPosiCurr+1)%2+1],nearData[ci][(fPosiCurr+1)%2+3]);
-                        prType=3;
+                    else{ //奇数次回来？
+//                        this->swap(nearData[ci][(fPosiCurr+1)%2+1],nearData[ci][(fPosiCurr+1)%2+3]); //？这又是为啥
+                        prType=1; //能选到剩余的唯一的B边？
                     }
                 }
-            }
+            } // 当前选取的节点的度已经是1了
             else if(nearData[ci][0]==1){
                 if(ci==st){
                     stAppear = 1;
@@ -385,7 +395,7 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
             }
         }
     }
-    while(bunkiMany!=0){
+    while(bunkiMany!=0){ //还有缓存的边怎么处理
         fPosiCurr=0;
         r=rand()%bunkiMany;
         st=bunki[r];
@@ -415,7 +425,7 @@ RETURN:
     }
 }
 
-void TCross::formABcycle(){
+void TCross::formABcycle(){ //根据fPosiCurr的信息生成AB-Cycles
     int j;
     int st_count;
     int edge_type;
@@ -423,44 +433,44 @@ void TCross::formABcycle(){
     int cem;
     int diff;
 
-    if(fPosiCurr%2==0) edge_type=1;
-    else edge_type=2;
-    st=fRoute[fPosiCurr];
+    if(fPosiCurr%2==0) edge_type=1; //不剩
+    else edge_type=2; // 剩边
+    st=fRoute[fPosiCurr]; //从最后一个点往前找更方便找AB-cycles把
     cem=0;
-    fC[cem]=st;
+    fC[cem]=st; //注意这里的起始点是最后一个点，因为最后一个点一定在AB-Cycles里
 
     st_count=0;
-    while(1){
+    while(1){//更新节点状态，把节点加入暂存区
         cem++;
         fPosiCurr--;
         ci=fRoute[fPosiCurr];
-        if(nearData[ci][0]==2){
-            koritsu[koriInv[ci]]=koritsu[koritsuMany-1];
-            koriInv[koritsu[koritsuMany-1]]=koriInv[ci];
+        if(nearData[ci][0]==2){ //还在候选AB-cycles里面？
+            koritsu[koriInv[ci]]=koritsu[koritsuMany-1]; // 互相建立映射关系，看不懂什么意思
+            koriInv[koritsu[koritsuMany-1]]=koriInv[ci]; // ?
             koritsuMany--;
-            bunki[bunkiMany]=ci;
+            bunki[bunkiMany]=ci; //互相建立映射关系，看不懂什么意思
             bunInv[ci]=bunkiMany;
-            bunkiMany++;
+            bunkiMany++; //在缓存区的点有多少？或者说被选了一个的点有多少？
         }
-        else if(nearData[ci][0]==1){
+        else if(nearData[ci][0]==1){ //不是第一次进入候选AB -Cycles里面了？
             bunki[bunInv[ci]]=bunki[bunkiMany-1];
             bunInv[bunki[bunkiMany-1]]=bunInv[ci];
             bunkiMany--;
         }
 
-        nearData[ci][0]--;
+        nearData[ci][0]--; //代表点进入缓存区了？
         if(ci==st) st_count++;
-        if(st_count==stAppear) break;
+        if(st_count==stAppear) break;//证明已经完全结束了，肯定不剩东西了
         fC[cem]=ci;
     }
 
-    if(cem==2) return;
+    if(cem==2) return; //这个AB-cycles是没有用的那种
 
     fABcycle[fNumOfABcycle][0]=cem;
 
-    if(edge_type==2){
+    if(edge_type==2){//为啥省边要调一下，不懂
         stock=fC[0];
-        for( int j=0;j<cem-1;j++) fC[j]=fC[j+1];
+        for( int j=0;j<cem-1;j++) fC[j]=fC[j+1]; //把第一个放到最后一个？
         fC[cem-1]=stock;
     }
 
@@ -473,7 +483,7 @@ void TCross::formABcycle(){
     fC[ cem ] = fC[ 0 ];
     fC[ cem+1 ] = fC[ 1 ];
     diff = 0;
-    for( j = 0; j < cem/2; ++j ) diff = diff + eval->fEdgeDis[fC[2*j]][fC[1+2*j]] - eval->fEdgeDis[fC[1+2*j]][fC[2+2*j]];
+    for( j = 0; j < cem/2; ++j ) diff = diff + eval->fEdgeDis[fC[2*j]][fC[1+2*j]] - eval->fEdgeDis[fC[1+2*j]][fC[2+2*j]]; //应该是计算熵的处理方式吧。。
 
     fGainAB[fNumOfABcycle] = diff;
     ++fNumOfABcycle;
