@@ -1,5 +1,6 @@
 #ifndef __INDI__
 #define __INDI__
+// 个体类
 
 #include <math.h>
 #include <stdio.h>
