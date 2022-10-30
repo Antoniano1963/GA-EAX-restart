@@ -44,7 +44,7 @@ void TRandom::permutation( int *array, int numOfElement, int numOfSample ){
     int *b = new int[numOfElement];
     for(j=0;j<numOfElement;j++) b[j]=0;
     for(i=0;i<numOfSample;i++){
-        r=rand()%(numOfElement-i);
+        r=rand()%(numOfElement-i); //应该又是取数往回放的那个思想
         k=0;
         for(j=0;j<=r;j++){
             while(b[k]==1) ++k;

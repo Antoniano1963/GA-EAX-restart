@@ -36,9 +36,9 @@ void TEvaluator::setInstance( char filename[] )//似乎是读取文件的函数
     /* read instance */
     for(int i=0;1<1000;i++){
         if( fscanf( fp, "%s", word ) == EOF ) break;
-        printf("Current Word is %s\n", word);
+//        printf("Current Word is %s\n", word);
         if( strcmp( word, "DIMENSION" ) == 0 ){
-            printf("Position 0\n");
+//            printf("Position 0\n");
             fscanf( fp, "%s", word );
             fscanf( fp, "%d", &Ncity );
         }

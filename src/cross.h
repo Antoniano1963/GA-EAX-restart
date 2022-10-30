@@ -75,9 +75,9 @@ private:
     int fEvalType;
     int fEsetType;
     int fNumOfABcycleInESet;
-    int fNumOfABcycle;
+    int fNumOfABcycle; //AB cycles的总数
     int fPosiCurr;
-    int fMaxNumOfABcycle;
+    int fMaxNumOfABcycle; // AB cycles的最大生成数量
 
     int *koritsu;
     int *bunki;

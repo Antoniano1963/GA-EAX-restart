@@ -178,11 +178,11 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
 
     if (fEsetType == 1) /* Single-AB */ //应该是核心选择操作？
     {
-        tRand->permutation( fPermu, fNumOfABcycle, fNumOfABcycle );
+        tRand->permutation( fPermu, fNumOfABcycle, fNumOfABcycle ); //感觉应该是一个生成随机数的函数，用来规定哪一个子代用哪一个AB-Cycles
     }
 
     else if( fEsetType == 2 )
-    {  // Block2
+    {  // Block2 //先不管block2的实现逻辑
         for( int k =0; k< fNumOfABcycle; ++k ) fNumOfElementINAB[ k ] = fABcycle[ k ][ 0 ];
         tSort->indexB( fNumOfElementINAB, fNumOfABcycle, fPermu, fNumOfABcycle );
     }
@@ -190,7 +190,7 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
     pointMax = 0.0;
     BestGain = 0;
     fFlagImp = 0;
-    for( int j =0; j < Num; ++j )
+    for( int j =0; j < Num; ++j ) //它这个是一次直接生成一个子代，所以fABcycleInEset中存的只有这一次要生成子代对应的E-set中存了多少AB-cycles
     {
         fNumOfABcycleInEset = 0;
         if (fEsetType == 1) /* Single-AB */
@@ -209,19 +209,20 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
                     if( rand() %2 == 0 ) fABcycleInEset[ fNumOfABcycleInEset++ ] = s;
                 }
             }
-        this->searchEset( centerAB );
+            this->searchEset( centerAB ); //跟block2政策有关，如果要修改再看吧
         }
+        // 上面是确认了这次形成的E-set中使用了哪些AB-cycles
         fNumOfSPL = 0;
         gain = 0;
-        fNumOfAppliedCycle = 0;
+        fNumOfAppliedCycle = 0; //这次使用多少个AB-cycles去生成E-set
         fNumOfModiEdge = 0;
 
-        fNumOfAppliedCycle = fNumOfABcycleInEset;
+        fNumOfAppliedCycle = fNumOfABcycleInEset; //对于Single Strategy 为1
         for( int k = 0; k < fNumOfAppliedCycle; ++k ){
             fAppliedCylce[ k ] = fABcycleInEset[ k ];
-            jnum = fAppliedCylce[ k ];
-            this->changeSol( tKid, jnum, flagP );
-            gain += fGainAB[ jnum ];
+            jnum = fAppliedCylce[ k ]; //虽然不懂为啥要分Applied Cycle和 In Eset两个方法去记录
+            this->changeSol( tKid, jnum, flagP ); //应该是改变解的函数吧
+            gain += fGainAB[ jnum ]; //这个应该是用来计算熵之类的东西
         }
 
         this->makeUnit();
@@ -229,6 +230,8 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
         gain += fGainModi;
 
         ++fNumOfGeneratedCh;
+
+        //下面就是选取了
 
         if (fEvalType == 1) /* Greedy */
             DLoss = 1.0;
@@ -496,23 +499,25 @@ void TCross::swap(int &x, int &y){
 }
 
 void TCross::changeSol( TIndi& tKid, int ABnum, int type ){
+    //type = 1？
     int j;
     int cem, r1, r2, b1, b2;
     int po_r1, po_r2, po_b1, po_b2;
 
-    cem=fABcycle[ABnum][0];
-    fC[0]=fABcycle[ABnum][0];
+    cem=fABcycle[ABnum][0]; //对应AB-Cycles的长度？
+    fC[0]=fABcycle[ABnum][0]; //暂存AB-cycles节点的列表
 
-    if(type==2) for(j=0;j<cem+3;j++) fC[cem+3-j]=fABcycle[ABnum][j+1];
+    if(type==2) for(j=0;j<cem+3;j++) fC[cem+3-j]=fABcycle[ABnum][j+1]; //不知道这个有啥用
     else for(j=1;j<=cem+3;j++) fC[j]=fABcycle[ABnum][j];
 
-    for(j=0;j<cem/2;j++){
-        r1=fC[2+2*j];r2=fC[3+2*j];
-        b1=fC[1+2*j];b2=fC[4+2*j];
+    for(j=0;j<cem/2;j++){ //因为ab是交替的，所以用*2 + 1 和不加 1来分别指代AB
+        r1=fC[2+2*j];r2=fC[3+2*j]; //为啥是2 3 1 4呀？ 所以1-2是B的边 2-3是A的边 这也符合第一次选B的边的推断
+        b1=fC[1+2*j];b2=fC[4+2*j]; //b1 是用来替换进来的？ 应该是b1 b4是 B中的点 r1 r2是A中的点？
 
-        if(tKid.fLink[r1][0]==r2) tKid.fLink[r1][0]=b1;
+
+        if(tKid.fLink[r1][0]==r2) tKid.fLink[r1][0]=b1; //就是说吧r2替换成b1
         else tKid.fLink[r1][1]=b1;
-        if(tKid.fLink[r2][0]==r1) tKid.fLink[r2][0]=b2;
+        if(tKid.fLink[r2][0]==r1) tKid.fLink[r2][0]=b2; //把41替换成b2?
         else tKid.fLink[r2][1]=b2;
 
         po_r1 = fInv[ r1 ];

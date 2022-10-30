@@ -62,7 +62,7 @@ void TEnvironment::doIt()
 
     while (duration < tmax) //判断会不会超时
     {
-        this->setAverageBest();
+        this->setAverageBest(); //更新一些统计信息，如有多少代没有提升
         if (gBestValue == -1 || fBestValue < gBestValue)
         {
             gBestValue = fBestValue;
@@ -77,7 +77,7 @@ void TEnvironment::doIt()
         }
         if (fCurNumOfGen % 50 == 0)
         {
-            printf("%d:\t%d\t%lf\n", fCurNumOfGen, fBestValue, fAverageValue);
+            printf("%d:\t%d\t%lf\n", fCurNumOfGen, fBestValue, fAverageValue); //判断时间和打印信息
             // record time every 50 gens
             this->fTimeEnd = clock();
             duration = (int)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
@@ -90,7 +90,7 @@ void TEnvironment::doIt()
 
         this->selectForMating();
         for (int s = 0; s < Npop; ++s)
-            this->generateKids(s);
+            this->generateKids(s); //EAX所有的流程都在generateKids这个函数中
 
         ++fCurNumOfGen;
     }
@@ -155,18 +155,19 @@ void TEnvironment::setAverageBest()
     int stockBest = tBest.fEvaluationValue;
     fAverageValue = 0.0;
     fBestIndex = 0;
-    fBestValue = tCurPop[0].fEvaluationValue;
+    fBestValue = tCurPop[0].fEvaluationValue; //难道已经排过序了吗？
     for(int i = 0; i < Npop; ++i )
     {
         fAverageValue += tCurPop[i].fEvaluationValue;
         if( tCurPop[i].fEvaluationValue < fBestValue )
         {
-            fBestIndex = i;
+            fBestIndex = i; //记录最优解是哪一个？和tBest有啥区别
             fBestValue = tCurPop[i].fEvaluationValue;
         }
     }
-    tBest = tCurPop[ fBestIndex ];
-    fAverageValue /= (double)Npop;
+    //
+    tBest = tCurPop[ fBestIndex ]; //更新tBest?
+    fAverageValue /= (double)Npop; //种群平均路由长度
     if( tBest.fEvaluationValue < stockBest )
     {
         fStagBest = 0;
@@ -191,10 +192,11 @@ void TEnvironment::selectForMating()
     fIndexForMating[ Npop ] = fIndexForMating[ 0 ];
 }
 
-void TEnvironment::generateKids( int s )
+void TEnvironment::generateKids( int s ) //
 {
     /* Note: tCurPop[fIndexForMating[s]] is replaced with a best offspring solutions in tCorss->DoIt(). 
      fEegeFreq[][] is also updated there. */
+    // 这里s就已经确定了当前的两个父代
     tCross->setParents( tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s+1]], fFlagC, Nch );  
     tCross->doIt( tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s+1]], Nch, 1, fFlagC, fEdgeFreq );
     fAccumurateNumCh += tCross->fNumOfGeneratedCh;
