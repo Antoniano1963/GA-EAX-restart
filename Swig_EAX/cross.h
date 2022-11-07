@@ -20,11 +20,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <vector>
+#include <tuple>
 
 class TCross
 {
 public:
     TCross( int N );
+    TCross( int N, double** edge_scores);
     ~TCross();
     void doIt(TIndi &tKid, TIndi &tPa2, int numOfKids, int flagP, int flagC[10], int **fEdgeFreq);/* Main procedure of EAX */
     void setParents(const TIndi &tPa1, const TIndi &tPa2, int flagC[10], int numOfKids);/* Set information of the parent tours */
@@ -146,6 +149,8 @@ private:
 
     int **fInEffectNode;
     int **fWeightRR;
+    double **edge_scores;
+    std::vector<tuple<double, int>> sort_score_index;
 };
 
 #endif

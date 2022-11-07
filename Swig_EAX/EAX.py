@@ -100,9 +100,9 @@ def EAX(Npop_num, Nch_num, best_solution, tmax_num, random_num, FileName):
     return _EAX.EAX(Npop_num, Nch_num, best_solution, tmax_num, random_num, FileName)
 EAX = _EAX.EAX
 
-def EAX2(Npop_num, Nch_num, best_solution, tmax_num, random_num, FileName, N_city, X_position, Y_position):
-    return _EAX.EAX2(Npop_num, Nch_num, best_solution, tmax_num, random_num, FileName, N_city, X_position, Y_position)
-EAX2 = _EAX.EAX2
+def EAX3(Npop_num, Nch_num, best_solution, tmax_num, random_num, N_city, input_vector):
+    return _EAX.EAX3(Npop_num, Nch_num, best_solution, tmax_num, random_num, N_city, input_vector)
+EAX3 = _EAX.EAX3
 # This file is compatible with both classic and new-style classes.
 
 

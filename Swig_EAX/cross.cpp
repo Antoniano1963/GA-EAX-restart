@@ -71,6 +71,77 @@ TCross::TCross( int N ){
     fABcycleInEset = new int [ fMaxNumOfABcycle ];
 }
 
+TCross::TCross( int N, double** Edge_Scores){
+    fMaxNumOfABcycle = 2000; /* Set an appropriate value (2000 is usually enough) */
+    fN = N;
+    tBestTmp.define( fN );
+    nearData = new int* [ fN ];
+    for ( int j = 0; j < fN; ++j )
+        nearData[j] = new int [ 5 ];
+
+    fABcycle = new int* [ fMaxNumOfABcycle ];
+    for ( int j = 0; j < fMaxNumOfABcycle; ++j ) fABcycle[j] = new int [ 2*fN + 4 ];
+
+    koritsu = new int [ fN ];
+    bunki = new int [ fN ];
+    koriInv = new int [ fN ];
+    bunInv = new int [ fN ];
+    checkKoritsu = new int [ fN ];
+    fRoute = new int [ 2*fN + 1 ];
+    fPermu = new int [ fMaxNumOfABcycle ];
+
+    fC = new int [ 2*fN+4 ];
+    fJun = new int[ fN+ 1 ];
+    fOrd1 = new int [ fN ];
+    fOrd2 = new int [ fN ];
+
+    // Speed Up Start
+    fOrder = new int [ fN ];
+    fInv = new int [ fN ];
+    fSegment = new int* [ fN ];
+    for ( int j = 0; j < fN; ++j ) fSegment[ j ] = new int [ 2 ];
+
+    fSegUnit = new int [ fN ];
+    fSegPosiList = new int[ fN ];
+    LinkAPosi = new int [ fN ];
+    LinkBPosi = new int* [ fN ];
+    for ( int j = 0; j < fN; ++j ) LinkBPosi[ j ] = new int [ 2 ];
+
+    fPosiSeg = new int [ fN ];
+    fNumOfElementInUnit = new int [ fN ];
+    fCenterUnit = new int [ fN ];
+    for ( int j = 0; j < fN; ++j ) fCenterUnit[ j ] = 0;
+
+    fListOfCenterUnit = new int [ fN+2 ];
+    fSegForCenter = new int [ fN ];
+    fGainAB = new int [ fN ];
+    fModiEdge = new int* [ fN ];
+    for ( int j = 0; j < fN; ++j ) fModiEdge[ j ] = new int [ 4 ];
+
+    fBestModiEdge = new int* [ fN ];
+    for ( int j = 0; j < fN; ++j ) fBestModiEdge[ j ] = new int [ 4 ];
+
+    fAppliedCylce = new int [ fN ];
+    fBestAppliedCylce = new int [ fN ];
+    // Speed Up End
+
+    // Block2
+    fNumOfElementINAB = new int [ fMaxNumOfABcycle ];
+    fInEffectNode = new int* [ fN ];
+    for( int i = 0; i < fN; ++i ) fInEffectNode[ i ] = new int [ 2 ];
+
+    fWeightRR = new int* [ fMaxNumOfABcycle ];
+    for( int i = 0; i < fMaxNumOfABcycle; ++i ) fWeightRR[ i ] = new int [ fMaxNumOfABcycle ];
+
+    fWeightSR = new int [ fMaxNumOfABcycle ];
+    fWeightC = new int [ fMaxNumOfABcycle ];
+    fUsedAB = new int [ fN ];
+    fMovedAB = new int [ fN ];
+    fABcycleInEset = new int [ fMaxNumOfABcycle ];
+    edge_scores = Edge_Scores;
+}
+
+
 TCross::~TCross()
 {
     delete [] koritsu;
@@ -171,20 +242,35 @@ void TCross::doIt( TIndi& tKid, TIndi& tPa2, int numOfKids, int flagP, int flagC
     double DLoss;
 
     fEvalType = flagC[ 0 ]; //1:Greedy, 2:---, 3:Distance, 4:Entropy
-    fEsetType = flagC[ 1 ]; // 1:Single-AB, 2:Block2
+    fEsetType = flagC[ 1 ]; // 1:Single-AB, 2:Block2, 3:self_design
 
     if ( numOfKids <= fNumOfABcycle ) Num = numOfKids;
     else Num = fNumOfABcycle;
 
     if (fEsetType == 1) /* Single-AB */ //应该是核心选择操作？
     {
-        tRand->permutation( fPermu, fNumOfABcycle, fNumOfABcycle ); //感觉应该是一个生成随机数的函数，用来规定哪一个子代用哪一个AB-Cycles
+//        tRand->permutation( fPermu, fNumOfABcycle, fNumOfABcycle ); //感觉应该是一个生成随机数的函数，用来规定哪一个子代用哪一个AB-Cycles
+//先暂时不改这里，一改动一大堆
+        sort(sort_score_index.begin(), sort_score_index.end());
+        //别忘了清空
+        for(int i=0;i<numOfKids;i++){
+            fPermu[i] = get<1>(sort_score_index[i]);
+        }
+        sort_score_index.clear();
     }
 
     else if( fEsetType == 2 )
     {  // Block2 //先不管block2的实现逻辑
         for( int k =0; k< fNumOfABcycle; ++k ) fNumOfElementINAB[ k ] = fABcycle[ k ][ 0 ];
         tSort->indexB( fNumOfElementINAB, fNumOfABcycle, fPermu, fNumOfABcycle );
+    }
+    else if(fEsetType == 3){
+        sort(sort_score_index.begin(), sort_score_index.end());
+        //别忘了清空
+        for(int i=0;i<numOfKids;i++){
+            fPermu[i] = get<1>(sort_score_index[i]);
+        }
+        sort_score_index.clear();
     }
     fNumOfGeneratedCh = 0;
     pointMax = 0.0;
@@ -339,7 +425,7 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
 
                             stAppear = 1;
                             this->formABcycle();
-                            if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
+                            if( flagC[ 1 ] == 1 && fNumOfABcycle == 4 * numOfKids ) goto RETURN;
                             if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
 
                             flagSt=0;
@@ -355,7 +441,7 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
                     else{ //如果不是第一次回到起始点
                         stAppear = 2; //如果是第二次回到起点说明应该可以生成AB-Cycles了
                         this->formABcycle();
-                        if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
+                        if( flagC[ 1 ] == 1 && fNumOfABcycle == 4 * numOfKids ) goto RETURN;
                         if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
 
                         flagSt=1;
@@ -372,7 +458,7 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
                     if((fPosiCurr-checkKoritsu[ci])%2==0){ //如果是偶数次回来了，应该是能生成AB cycles的
                         stAppear = 1;
                         this->formABcycle();
-                        if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
+                        if( flagC[ 1 ] == 1 && fNumOfABcycle == 4 * numOfKids ) goto RETURN;
                         if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
 
                         flagSt=0;
@@ -389,7 +475,7 @@ void TCross::setABcycle( const TIndi& tPa1, const TIndi& tPa2, int flagC[ 10 ], 
                 if(ci==st){
                     stAppear = 1;
                     this->formABcycle();
-                    if( flagC[ 1 ] == 1 && fNumOfABcycle == numOfKids ) goto RETURN;
+                    if( flagC[ 1 ] == 1 && fNumOfABcycle == 4 * numOfKids ) goto RETURN;
                     if( fNumOfABcycle == fMaxNumOfABcycle ) goto RETURN;
                     flagSt=1;
                     flagCycle=1;
@@ -479,10 +565,24 @@ void TCross::formABcycle(){ //根据fPosiCurr的信息生成AB-Cycles
 
     for( int j=0;j<cem;j++) fABcycle[fNumOfABcycle][j+2]=fC[j];
 
-    fABcycle[fNumOfABcycle][1]=fC[cem-1];
-    fABcycle[fNumOfABcycle][cem+2]=fC[0];
+    fABcycle[fNumOfABcycle][1]=fC[cem-1]; // fc [1, 2, 3, 4, 5, 6]
+    fABcycle[fNumOfABcycle][cem+2]=fC[0]; // fAB[_,6 B边,1,A边 2, 3, 4, 5(cem), 6, 1, 2]
     fABcycle[fNumOfABcycle][cem+3]=fC[1];
-
+    double total_score = 0;
+    for(int i=1;i<=cem;i++){
+        if(i%2==1){
+            int b_1= fC[i];
+            int r_1 = fC[i+1];
+            double current_edge_score = edge_scores[b_1][r_1];
+            total_score += current_edge_score;
+        } else{
+            int r_1= fC[i];
+            int b_1 = fC[i+1];
+            double current_edge_score = edge_scores[r_1][b_1];
+            total_score -= current_edge_score;
+        }
+    }
+    sort_score_index.push_back(make_tuple(total_score, fNumOfABcycle));
     fC[ cem ] = fC[ 0 ];
     fC[ cem+1 ] = fC[ 1 ];
     diff = 0;
@@ -509,7 +609,7 @@ void TCross::changeSol( TIndi& tKid, int ABnum, int type ){
 
     if(type==2) for(j=0;j<cem+3;j++) fC[cem+3-j]=fABcycle[ABnum][j+1]; //不知道这个有啥用
     else for(j=1;j<=cem+3;j++) fC[j]=fABcycle[ABnum][j];
-
+    // 比如FC[_,1,2,3,4,5,6] r1 = 2 b1 = 1 r2 = 3 b2 = 4 边b1-r1是B边 r1-r2是A边 r2-b2是B边 所以
     for(j=0;j<cem/2;j++){ //因为ab是交替的，所以用*2 + 1 和不加 1来分别指代AB
         r1=fC[2+2*j];r2=fC[3+2*j]; //为啥是2 3 1 4呀？ 所以1-2是B的边 2-3是A的边 这也符合第一次选B的边的推断
         b1=fC[1+2*j];b2=fC[4+2*j]; //b1 是用来替换进来的？ 应该是b1 b4是 B中的点 r1 r2是A中的点？
@@ -519,6 +619,7 @@ void TCross::changeSol( TIndi& tKid, int ABnum, int type ){
         else tKid.fLink[r1][1]=b1;
         if(tKid.fLink[r2][0]==r1) tKid.fLink[r2][0]=b2; //把41替换成b2?
         else tKid.fLink[r2][1]=b2;
+        // 所以每一次相当于断一个A边，并且添加两个半B边
 
         po_r1 = fInv[ r1 ];
         po_r2 = fInv[ r2 ];

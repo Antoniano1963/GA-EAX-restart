@@ -52,7 +52,7 @@ void TEnvironment::define()
     this->fTimeStart = clock();
 }
 
-void TEnvironment::defineDirectFromInput(double* X_position, double* Y_position, int Ncity)
+void TEnvironment::defineDirectFromInput(double* X_position, double* Y_position, int Ncity, double** edge_scores)
 {
     fEvaluator->setInstanceDirectFromInput(X_position, Y_position, Ncity);
     int N = fEvaluator->Ncity;
@@ -64,7 +64,7 @@ void TEnvironment::defineDirectFromInput(double* X_position, double* Y_position,
     gBest.define(N);
 
     tBest.define( N );
-    tCross = new TCross( N );
+    tCross = new TCross( N, edge_scores );
     tCross->eval = fEvaluator;
     tCross->Npop = Npop;
 
@@ -106,6 +106,7 @@ void TEnvironment::doIt()
             // record time every 50 gens
             this->fTimeEnd = clock();
             duration = (int)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+            printf("Currnet Time:  %d\n", duration); //判断时间和打印信息
             if (duration >= tmax)
                 break;
         }

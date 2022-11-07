@@ -3419,9 +3419,9 @@ SWIGINTERNINLINE PyObject*
 }
 
 
-int EAX2( int Npop_num, int Nch_num, int best_solution, int tmax_num, int random_num,  char* FileName,int N_city, double* X_position, int size_in1, double* Y_position, int size_in2){
+int EAX3( int Npop_num, int Nch_num, int best_solution, int tmax_num, int random_num,  int N_city, double* input_vector, int size_in1){
     /*  calls the original funcion, providing only the size of the first */
-    EAX2(Npop_num, Nch_num, best_solution, tmax_num, random_num,  FileName, N_city, X_position, Y_position);
+    EAX3(Npop_num, Nch_num, best_solution, tmax_num, random_num, N_city, input_vector);
 }
 
 
@@ -3970,19 +3970,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_EAX2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_EAX3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
   int arg5 ;
-  char *arg6 = (char *) 0 ;
-  int arg7 ;
-  double *arg8 = (double *) 0 ;
-  int arg9 ;
-  double *arg10 = (double *) 0 ;
-  int arg11 ;
+  int arg6 ;
+  double *arg7 = (double *) 0 ;
+  int arg8 ;
   int val1 ;
   int ecode1 = 0 ;
   int val2 ;
@@ -3993,15 +3990,10 @@ SWIGINTERN PyObject *_wrap_EAX2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   int ecode4 = 0 ;
   int val5 ;
   int ecode5 = 0 ;
-  int res6 ;
-  char *buf6 = 0 ;
-  int alloc6 = 0 ;
-  int val7 ;
-  int ecode7 = 0 ;
-  PyArrayObject *array8 = NULL ;
-  int is_new_object8 = 0 ;
-  PyArrayObject *array10 = NULL ;
-  int is_new_object10 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -4009,98 +4001,65 @@ SWIGINTERN PyObject *_wrap_EAX2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) 
   PyObject * obj4 = 0 ;
   PyObject * obj5 = 0 ;
   PyObject * obj6 = 0 ;
-  PyObject * obj7 = 0 ;
-  PyObject * obj8 = 0 ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOO:EAX2",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOO:EAX3",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
   ecode1 = SWIG_AsVal_int(obj0, &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "EAX2" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "EAX3" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = static_cast< int >(val1);
   ecode2 = SWIG_AsVal_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "EAX2" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "EAX3" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "EAX2" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "EAX3" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   ecode4 = SWIG_AsVal_int(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "EAX2" "', argument " "4"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "EAX3" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
   ecode5 = SWIG_AsVal_int(obj4, &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "EAX2" "', argument " "5"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "EAX3" "', argument " "5"" of type '" "int""'");
   } 
   arg5 = static_cast< int >(val5);
-  res6 = SWIG_AsCharPtrAndSize(obj5, &buf6, NULL, &alloc6);
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "EAX2" "', argument " "6"" of type '" "char *""'");
-  }
-  arg6 = reinterpret_cast< char * >(buf6);
-  ecode7 = SWIG_AsVal_int(obj6, &val7);
-  if (!SWIG_IsOK(ecode7)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "EAX2" "', argument " "7"" of type '" "int""'");
+  ecode6 = SWIG_AsVal_int(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "EAX3" "', argument " "6"" of type '" "int""'");
   } 
-  arg7 = static_cast< int >(val7);
+  arg6 = static_cast< int >(val6);
   {
     npy_intp size[1] = {
       -1 
     };
-    array8 = obj_to_array_contiguous_allow_conversion(obj7,
+    array7 = obj_to_array_contiguous_allow_conversion(obj6,
       NPY_DOUBLE,
-      &is_new_object8);
-    if (!array8 || !require_dimensions(array8, 1) ||
-      !require_size(array8, size, 1)) SWIG_fail;
-    arg8 = (double*) array_data(array8);
-    arg9 = (int) array_size(array8,0);
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 1) ||
+      !require_size(array7, size, 1)) SWIG_fail;
+    arg7 = (double*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
   }
-  {
-    npy_intp size[1] = {
-      -1 
-    };
-    array10 = obj_to_array_contiguous_allow_conversion(obj8,
-      NPY_DOUBLE,
-      &is_new_object10);
-    if (!array10 || !require_dimensions(array10, 1) ||
-      !require_size(array10, size, 1)) SWIG_fail;
-    arg10 = (double*) array_data(array10);
-    arg11 = (int) array_size(array10,0);
-  }
-  result = (int)EAX2(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  result = (int)EAX3(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
   resultobj = SWIG_From_int(static_cast< int >(result));
-  if (alloc6 == SWIG_NEWOBJ) delete[] buf6;
   {
-    if (is_new_object8 && array8)
+    if (is_new_object7 && array7)
     {
-      Py_DECREF(array8); 
-    }
-  }
-  {
-    if (is_new_object10 && array10)
-    {
-      Py_DECREF(array10); 
+      Py_DECREF(array7); 
     }
   }
   return resultobj;
 fail:
-  if (alloc6 == SWIG_NEWOBJ) delete[] buf6;
   {
-    if (is_new_object8 && array8)
+    if (is_new_object7 && array7)
     {
-      Py_DECREF(array8); 
-    }
-  }
-  {
-    if (is_new_object10 && array10)
-    {
-      Py_DECREF(array10); 
+      Py_DECREF(array7); 
     }
   }
   return NULL;
@@ -4110,7 +4069,7 @@ fail:
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"EAX", _wrap_EAX, METH_VARARGS, NULL},
-	 { (char *)"EAX2", _wrap_EAX2, METH_VARARGS, NULL},
+	 { (char *)"EAX3", _wrap_EAX3, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 

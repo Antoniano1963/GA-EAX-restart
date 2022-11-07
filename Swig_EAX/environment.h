@@ -34,7 +34,7 @@ public:
     ~TEnvironment();
 
     void define();   /* Define the variables */
-    void defineDirectFromInput(double* X_position, double* Y_position, int Ncity);
+    void defineDirectFromInput(double* X_position, double* Y_position, int Ncity, double** edge_scores);
     void doIt();   /* Main procedure of the GA */
     void init();   /* Initialization of the GA */
     bool terminationCondition(); /* Decide whether to proceed to next stage (or treminate the GA) */

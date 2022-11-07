@@ -18,5 +18,6 @@
 void signalHandler(int signum);
 int EAX( int Npop_num, int Nch_num, int best_solution, int tmax_num, int random_num,  char* FileName);
 int EAX2( int Npop_num, int Nch_num, int best_solution, int tmax_num, int random_num,  char* FileName, int N_city, double* X_position, double* Y_position);
+int EAX3(int Npop_num, int Nch_num, int best_solution, int tmax_num, int random_num,  int N_city, double* input_vector);
 
 #endif //GA_EAX_RESTART_EAX_H
